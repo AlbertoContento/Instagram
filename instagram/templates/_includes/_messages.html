@@ -1,0 +1,20 @@
+<!--Creamos un html de mensajes para poder mostrarlo cuando queramos-->
+<div class="row mt-2 mb-2">
+    <div class="col-sm">
+        {% for message in messages %}<!--Pasamos por los mensajes-->
+        <div class="alert
+            {% if message.tags %}
+                {% if message.tags == 'error' %}
+                alert-danger
+                {% else %}
+                alert-{{ message.tags }}
+                {% endif %}
+            {% else %}
+                alert-info
+            {% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+<!--Lo que hace es si es error muestra un mensaje si es info otro y si es success otro-->
+    </div>
+</div>

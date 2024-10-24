@@ -1,14 +1,25 @@
 {% extends "general/layout.html" %}
 
+{% load crispy_forms_tags %}
+
 {% block head_title %}InstaConquer{% endblock %}
 {% block page_title %}
     <div class="container">
-    <h1>Login</h1>
+        <h1>Login</h1>
+        {% include '_includes/_messages.html' %}
     </div>
 {% endblock %}
 
 {% block page_content %}
 <div class="container">
-<p>Este es el contenido de nuestra login</p>
-</div>
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-12 col-sm-6">
+                {{ form.username|as_crispy_field }}
+                {{ form.password|as_crispy_field }}
+            </div>
+        </div>
+        <button class="btn btn-primary">Iniciar Sesion</button>
+    </form></div>
 {% endblock %}

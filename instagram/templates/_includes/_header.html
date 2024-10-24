@@ -1,8 +1,13 @@
 <header>
     <nav class="container">
         <li><a href="{% url 'home' %}">Inicio</a></li>
-        <li><a href="{% url 'login' %}">Login</a></li>
-        <li><a href="{% url 'register' %}">Registro</a></li>
+        {% if not request.user.is_authenticated %}
+            <li><a href="{% url 'login' %}">Login</a></li>
+            <li><a href="{% url 'register' %}">Registro</a></li>
+        {% endif %}
         <li><a href="{% url 'contact' %}">Contacto</a></li>
+        {% if request.user.is_authenticated %}
+            <li><a href="{% url 'logout' %}">Cerrar Sesion</a></li>
+        {% endif %}
     </nav>
 </header>

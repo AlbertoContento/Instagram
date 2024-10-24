@@ -26,6 +26,9 @@ INSTALLED_APPS = [
 #Agregamos las librerias externas
     'django_extensions',
     'debug_toolbar',
+    'crispy_forms',
+    'crispy_bootstrap5',
+
 
 #Agregamos las aplicaciones de nuestro proyecto
     'profiles',
@@ -115,3 +118,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"#configuramos el crispy de bootsrap5
+CRISPY_TEMPLATE_PACK = "bootstrap5"#configuramos el crispy de bootsrap5

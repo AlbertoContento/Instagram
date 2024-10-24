@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from debug_toolbar.toolbar import debug_toolbar_urls # type: ignore
 #importamos las vistas
-from .views import HomeView, LoginView, RegisterView, ContactView, LegalView
+from .views import HomeView, LoginView, RegisterView, ContactView, LegalView, logout_view
 
 
 urlpatterns = [
@@ -11,5 +11,6 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('register/', RegisterView.as_view(), name='register'),
     path('contact/', ContactView.as_view(), name='contact'),
-    path('legal/', LegalView.as_view(), name='legal')
+    path('legal/', LegalView.as_view(), name='legal'),
+    path('logout/', logout_view, name='logout')
 ]
