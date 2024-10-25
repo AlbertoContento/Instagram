@@ -15,7 +15,7 @@ class UserProfile(models.Model):
         verbose_name_plural = 'Perfiles'
 
     def __str__(self):
-        return self.username
+        return self.user.username
     
 #Creamos el modelo de follow para poder ver desde cuando sigue a alguien y a quien sigue y quien le sigue
 class Follow(models.Model):

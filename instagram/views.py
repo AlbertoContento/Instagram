@@ -1,11 +1,12 @@
-from django.views.generic import TemplateView, CreateView
+from django.views.generic import TemplateView, CreateView, DetailView
 from .forms import RegistrationForm, LoginForm
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from django.shortcuts import HttpResponseRedirect
-from django.views.generic.edit import FormView
+from django.views.generic.edit import FormView, UpdateView
+from profiles.models import UserProfile
 
 
 
@@ -57,3 +58,25 @@ def logout_view(request):
     logout(request)
     messages.add_message(request, messages.INFO, "Se ha cerrado sesión correctamente.")
     return HttpResponseRedirect(reverse('home'))
+
+
+#DETAILVIEW
+class ProfileDetailView(DetailView):
+    model = UserProfile
+    template_name = "general/profile_detail.html"
+    context_object_name = "profile"#con esto vamos a poder hacer referencia a todos los campos 
+
+
+#UPDATEVIEW
+class ProfileUpdateView(UpdateView):
+    model = UserProfile
+    template_name = "general/profile_update.html"
+    context_object_name = "profile"
+    fields = ['profile_picture', 'bio', 'birth_date']
+
+    def form_valid(self, form):#Cuando este validado mande mensaje
+        messages.add_message(self.request, messages.SUCCESS, "Perfil editado correctamente.")
+        return super(ProfileUpdateView, self).form_valid(form)
+    
+    def get_success_url(self):#devuelve la url del perfil editado
+        return reverse('profile_detail', args=[self.object.pk])
