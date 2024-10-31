@@ -8,6 +8,10 @@
     </div>
 {% endblock %}
 {% block page_content %}
-<div class="container">
-</div>
+    <section>
+        <h2>Ultimas publicaciones</h2>
+        {% for post in last_posts %}
+            {% include '_includes/posts/_posts.html' %}
+        {% endfor %}
+    </section>
 {% endblock %}

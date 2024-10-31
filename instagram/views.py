@@ -7,11 +7,21 @@ from django.contrib.auth import login, authenticate, logout
 from django.shortcuts import HttpResponseRedirect
 from django.views.generic.edit import FormView, UpdateView
 from profiles.models import UserProfile
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from posts.models import Post
 
 
-
+#Vamos a mostrar en la home las ultimas publicaciones
 class HomeView(TemplateView):
     template_name = "general/home.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+#guardamos en last_posts los ultimos 5 posts
+        last_posts = Post.objects.all().order_by('-created_at')[:5]
+        context['last_posts'] = last_posts
+
+        return context
 
 
 #FORMVIEW: vista para formulario
@@ -54,6 +64,7 @@ class ContactView(TemplateView):
 
 
 #FUNCION PARA CERRAR SESION
+@method_decorator(login_required, name='dispatch')#protege las vistas de usuarios que no esten autenticados
 def logout_view(request):
     logout(request)
     messages.add_message(request, messages.INFO, "Se ha cerrado sesión correctamente.")
@@ -61,6 +72,7 @@ def logout_view(request):
 
 
 #DETAILVIEW
+@method_decorator(login_required, name='dispatch')#protege las vistas de usuarios que no esten autenticados
 class ProfileDetailView(DetailView):
     model = UserProfile
     template_name = "general/profile_detail.html"
@@ -68,6 +80,7 @@ class ProfileDetailView(DetailView):
 
 
 #UPDATEVIEW
+@method_decorator(login_required, name='dispatch')#protege las vistas de usuarios que no esten autenticados
 class ProfileUpdateView(UpdateView):
     model = UserProfile
     template_name = "general/profile_update.html"

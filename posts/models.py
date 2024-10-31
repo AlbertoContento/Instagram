@@ -3,11 +3,11 @@ from django.contrib.auth.models import User
 
 class Post(models.Model):
     user = models.ForeignKey(User, verbose_name="Usuario", on_delete=models.CASCADE, related_name='posts')
-    image = models.ImageField("Imagen", upload_to='posts/')
+    image = models.ImageField("Imagen", upload_to='posts_images/')
     caption = models.TextField("Comentario", max_length=500, blank=True)
     created_at = models.DateTimeField("Fecha de Creacion", auto_now_add=True)
     #ESte campo es para saber que usuarios le dan a me gusta a este post
-    likes = models.ManyToManyField(User, verbose_name="Me gusta", related_name='liked_posts')
+    likes = models.ManyToManyField(User, verbose_name="Me gusta", related_name='liked_posts', blank=True)
     
     class Meta:#Para decir como quiero que me aparezca en el Admin
         verbose_name = 'Post'
