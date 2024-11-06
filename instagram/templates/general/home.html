@@ -1,17 +1,24 @@
 {% extends "general/layout.html" %}
 
 {% block head_title %}InstaConquer{% endblock %}
-{% block page_title %}
-    <div class="container">
-    <h1>Bienvenido a nuestra pagina</h1>
-    {% include '_includes/_messages.html' %}
-    </div>
-{% endblock %}
+
+{% block page_title %}Bienvenido a nuestra página{% endblock %}
+
 {% block page_content %}
-    <section>
-        <h2>Ultimas publicaciones</h2>
-        {% for post in last_posts %}
-            {% include '_includes/posts/_posts.html' %}
-        {% endfor %}
-    </section>
+    <div class="container">
+        {% include '_includes/_messages.html' %}
+
+        <section>
+            <h2>Últimas publicaciones</h2>
+            <div class="row">
+                {% for post in last_posts %}
+                    <div class="col-12 col-sm-6 col-md-4">
+                        {% include '_includes/posts/_posts.html' %}
+                    </div>
+                {% empty %}
+                    <p>No hay publicaciones recientes.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
 {% endblock %}

@@ -1,4 +1,7 @@
-from django.views.generic import TemplateView, CreateView, DetailView
+from django.db.models.query import QuerySet
+from django.http import HttpRequest
+from django.http.response import HttpResponse as HttpResponse
+from django.views.generic import TemplateView, CreateView, DetailView, ListView
 from .forms import RegistrationForm, LoginForm
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.models import User
@@ -64,7 +67,7 @@ class ContactView(TemplateView):
 
 
 #FUNCION PARA CERRAR SESION
-@method_decorator(login_required, name='dispatch')#protege las vistas de usuarios que no esten autenticados
+@login_required#protege las vistas de usuarios que no esten autenticados
 def logout_view(request):
     logout(request)
     messages.add_message(request, messages.INFO, "Se ha cerrado sesión correctamente.")
@@ -78,6 +81,16 @@ class ProfileDetailView(DetailView):
     template_name = "general/profile_detail.html"
     context_object_name = "profile"#con esto vamos a poder hacer referencia a todos los campos 
 
+#DETAILVIEW
+@method_decorator(login_required, name='dispatch')#protege las vistas de usuarios que no esten autenticados
+class ProfileListView(ListView):
+    model = UserProfile
+    template_name = "general/profile_list.html"
+    context_object_name = "profiles"#con esto vamos a poder hacer referencia a todos los campos 
+#Con esto excluimos que nos salga nuestro propio perfil
+    def get_queryset(self):
+        return UserProfile.objects.all().exclude(user=self.request.user)
+    
 
 #UPDATEVIEW
 @method_decorator(login_required, name='dispatch')#protege las vistas de usuarios que no esten autenticados
@@ -86,6 +99,13 @@ class ProfileUpdateView(UpdateView):
     template_name = "general/profile_update.html"
     context_object_name = "profile"
     fields = ['profile_picture', 'bio', 'birth_date']
+    
+    #Esto es para comprobar si estamos editando nuestro perfil o el de otra persona y si es asi le mandamos a la home
+    def dispatch(self, request, *args, **kwargs):
+        user_profile = self.get_object()
+        if user_profile.user != self.request.user:
+            return HttpResponseRedirect(reverse('home'))
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):#Cuando este validado mande mensaje
         messages.add_message(self.request, messages.SUCCESS, "Perfil editado correctamente.")
