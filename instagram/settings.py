@@ -120,8 +120,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"#configuramos el crispy de bootsrap5
-CRISPY_TEMPLATE_PACK = "bootstrap5"#configuramos el crispy de bootsrap5
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5" #configuramos el crispy de bootsrap5
+CRISPY_TEMPLATE_PACK = "bootstrap5" #configuramos el crispy de bootsrap5
 
 #Vamos a configurar el login_url para que cuando intentemos acceder a una view sin estar registrados nos lleve a la url de login
 LOGIN_URL= reverse_lazy('login')#Cuando intento entrar en una url que no puede entrar si no estoy logueado me manda al login

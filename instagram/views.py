@@ -13,15 +13,26 @@ from profiles.models import UserProfile
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from posts.models import Post
+from profiles.forms import FollowForm
+from profiles.models import Follow
 
 
 #Vamos a mostrar en la home las ultimas publicaciones
 class HomeView(TemplateView):
     template_name = "general/home.html"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-#guardamos en last_posts los ultimos 5 posts
-        last_posts = Post.objects.all().order_by('-created_at')[:5]
+
+        # Si el usuario está logueado
+        if self.request.user.is_authenticated:
+            # Obtenemos los posts de los usuarios que seguimos
+            seguidos = Follow.objects.filter(follower=self.request.user.profile).values_list('following__user', flat=True)
+            # Nos traemos los posts de los usuarios que seguimos
+            last_posts = Post.objects.filter(user__profile__user__in=seguidos)
+
+        else:#nos traemos los ultimos 10 post
+            last_posts = Post.objects.all().order_by('-created_at')[:10]
         context['last_posts'] = last_posts
 
         return context
@@ -75,11 +86,50 @@ def logout_view(request):
 
 
 #DETAILVIEW
-@method_decorator(login_required, name='dispatch')#protege las vistas de usuarios que no esten autenticados
-class ProfileDetailView(DetailView):
+@method_decorator(login_required, name='dispatch')
+class ProfileDetailView(DetailView, FormView):
     model = UserProfile
     template_name = "general/profile_detail.html"
-    context_object_name = "profile"#con esto vamos a poder hacer referencia a todos los campos 
+    context_object_name = "profile"
+    form_class = FollowForm
+
+    def get_initial(self):
+        self.initial['profile_pk'] =  self.get_object().pk
+        return super().get_initial()
+    
+    def form_valid(self, form):
+        profile_pk = form.cleaned_data.get('profile_pk')
+        action = form.cleaned_data.get('action')
+        following = UserProfile.objects.get(pk=profile_pk)
+
+
+        if Follow.objects.filter(
+            follower=self.request.user.profile,
+            following=following
+        ).count():
+            Follow.objects.filter(
+                follower=self.request.user.profile,
+                following=following
+            ).delete()
+            messages.add_message(self.request, messages.SUCCESS, f"Se ha dejado de seguir a {following.user.username}")
+        else:
+            Follow.objects.get_or_create(
+            follower=self.request.user.profile,
+            following=following
+            )
+            messages.add_message(self.request, messages.SUCCESS, f"Se empieza a seguir a {following.user.username}")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('profile_detail', args=[self.get_object().pk])
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Comprobamos si seguimos al usuario
+        following = Follow.objects.filter(follower=self.request.user.profile, following=self.get_object()).exists()
+        context['following'] = following
+        return context
+
 
 #DETAILVIEW
 @method_decorator(login_required, name='dispatch')#protege las vistas de usuarios que no esten autenticados

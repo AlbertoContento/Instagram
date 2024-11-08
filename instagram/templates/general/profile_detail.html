@@ -1,5 +1,7 @@
 {% extends "general/layout.html" %}
 
+{% load crispy_forms_tags %}
+
 {% block head_title %}InstaConquer{% endblock %}
 {% block page_title %}
     <div class="container">
@@ -23,6 +25,19 @@
     {% if profile.user == request.user %}
     <p><a href="{% url 'profile_update' profile.pk %}">Editar</a></p>
     {% endif %}
+
+    {% if profile.user != request.user %}
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form.profile_pk|as_crispy_field }}
+            {% if following %}
+                <button type="submit">Dejar de Seguir</button>
+            {% else %}
+                <button type="submit">Seguir</button>
+            {% endif %}
+        </form>
+    {% endif %}
+
     <section>
         <h2>Publicaciones</h2>
         <div class="row">
