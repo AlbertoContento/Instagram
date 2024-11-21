@@ -85,7 +85,7 @@ def logout_view(request):
     return HttpResponseRedirect(reverse('home'))
 
 
-#DETAILVIEW
+#DETAILVIEW CON FORMVIEW
 @method_decorator(login_required, name='dispatch')
 class ProfileDetailView(DetailView, FormView):
     model = UserProfile
@@ -131,16 +131,17 @@ class ProfileDetailView(DetailView, FormView):
         return context
 
 
-#DETAILVIEW
-@method_decorator(login_required, name='dispatch')#protege las vistas de usuarios que no esten autenticados
+#LISTVIEW
 class ProfileListView(ListView):
     model = UserProfile
     template_name = "general/profile_list.html"
     context_object_name = "profiles"#con esto vamos a poder hacer referencia a todos los campos 
 #Con esto excluimos que nos salga nuestro propio perfil
     def get_queryset(self):
-        return UserProfile.objects.all().exclude(user=self.request.user)
-    
+        if self.request.user.is_authenticated:
+            return UserProfile.objects.all().exclude(user=self.request.user)
+        return UserProfile.objects.all().order_by('user__username')
+
 
 #UPDATEVIEW
 @method_decorator(login_required, name='dispatch')#protege las vistas de usuarios que no esten autenticados

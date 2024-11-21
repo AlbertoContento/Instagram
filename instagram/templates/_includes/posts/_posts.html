@@ -30,18 +30,30 @@
 
         <!-- Pie de la publicación con botón de me gusta y contador -->
         <footer>
-            <div class="text-center">
-                <p>
-                    <span class="nLikes">{{ post.likes.all.count }}</span>
-                    <a class="likeButton" href="{% url 'post_like_ajax' post.pk %}">
-                        {% if request.user in post.likes.all %}
-                            <i class="bi bi-heart-fill"></i>
-                        {% else %}
-                            <i class="bi bi-heart"></i>
-                        {% endif %}
-                    </a>
-                </p>
-            </div>
+            <div class="text-center row">
+                {% if request.user.is_authenticated %}
+                    <div class="col">
+                        <p>
+                            <span class="nLikes">{{ post.likes.all.count }}</span>
+                            <a class="likeButton" href="{% url 'post_like_ajax' post.pk %}">
+                                {% if request.user in post.likes.all %}
+                                    <i class="bi bi-heart-fill"></i>
+                                {% else %}
+                                    <i class="bi bi-heart"></i>
+                                {% endif %}
+                            </a>
+                        </p>
+                    </div>
+                    <div class="col">
+                        <p>
+                            <span class="nComments">{{ post.comments.all.count }}</span>
+                            <a class="commentButton" href="{% url 'post_detail' post.pk %}">
+                                <i class="bi bi-chat-right-text"></i>
+                            </a>
+                        </p>
+                    </div>
+                {% endif %}
+            </div>            
 
             <!-- Botón para ver el post completo -->
             <p class="text-center mt-2 mb-2">

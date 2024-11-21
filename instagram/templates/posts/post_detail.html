@@ -1,5 +1,7 @@
 {% extends "general/layout.html" %}
 
+{% load crispy_forms_tags %}
+
 {% block head_title %}InstaConquer{% endblock %}
 {% block page_title %}{% endblock %}
 
@@ -27,6 +29,7 @@
                 <img width="300px" class="img-fluid img-responsive" src="{{ post.image.url }}">
             </div>
             <div class="text-center">
+                {% if request.user.is_authenticated %}
                 <p>
                     <span class="nLikes">{{ post.likes.all.count }}</span>
                     <a class="likeButton" href="{% url 'post_like_ajax' post.pk %}">
@@ -37,8 +40,49 @@
                         {% endif %}
                     </a>
                 </p>
+                {% endif %}
             </div>
-        </div>
+            <div>
+                <!-- Botón para ver el post completo -->
+                <p class="text-center mt-2 mb-2">
+                    <a class="btn btn-primary btn-sm" role="button" href="{% url 'home' %}">Volver</a>
+                </p>
+            </div>
+
+        <section class="comments">
+            <h4>Comentarios</h4>
+            {% if post.comments.all.count %} 
+                {% for comment in post.comments.all %}
+                    <article>
+                        <header>
+                            <strong>Autor:</strong> {{ comment.user }} <strong>Creado el:</strong> {{ comment.created_at }}
+                        </header>
+                        <div>
+                            <p>{{ comment.text }}</p>
+                        </div>
+                    </article>
+                {% endfor %}
+            {% else %}
+                <p>No hay ningun comentario para esta publicacion</p>
+            {% endif %}
+            <div>
+                <details>
+                    <summary>Nuevo comentario</summary>
+                    <form method="post">
+                    <div class="row">
+                        <div class="col col-12">
+                        {% csrf_token %}
+                        {{ form.text|as_crispy_field }}
+                        </div>
+                        <div class="col col-12">
+                        <button class="btn btn-sm btn-primary">Publicar</button>
+                        </div>
+                    </div>
+                    </form>
+                </details>
+                </div>
+        </section> 
+        </div>     
     </article>
 </div>
 {% endblock %}

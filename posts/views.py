@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
-from .forms import PostCreateForm # type: ignore
+from .forms import PostCreateForm, CommentCreateForm # type: ignore
 from django.shortcuts import HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
@@ -24,11 +24,20 @@ class PostCreateView(CreateView):
         return super(PostCreateView, self).form_valid(form)
 
 
-@method_decorator(login_required, name='dispatch')#protege las vistas de usuarios que no esten autenticados
-class PostDetailView(DetailView):
+class PostDetailView(DetailView, CreateView):
     template_name = "posts/post_detail.html"
     model = Post
     context_object_name = "post"
+    form_class = CommentCreateForm
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        form.instance.post = self.get_object()
+        return super(PostDetailView, self).form_valid(form)
+    
+    def get_success_url(self):
+        messages.add_message(self.request, messages.SUCCESS, "Comentario añadido correctamente.")
+        return reverse('post_detail', args=[self.get_object().pk])
 
 #Vista basada en una funcion con el decorador login required
 @login_required
