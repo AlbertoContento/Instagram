@@ -73,6 +73,5 @@ def like_post_ajax(request, pk):
                 'message': 'Te gusta esta publicacion',
                 'liked': True,
                 'nLikes': post.likes.all().count()
-
             }
         )

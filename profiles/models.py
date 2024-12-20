@@ -19,8 +19,22 @@ class UserProfile(models.Model):
     
     #FUNCION para seguidores
     def follow(self, profile):
-        Follow.objects.get_or_create(follower=self, following=profile)
-    
+        follow, created = Follow.objects.get_or_create(follower=self, following=profile)
+        return created
+    #FUNCION para no seguidores
+    def unfollow(self, profile):
+        if Follow.objects.filter(follower=self, following=profile).count():
+            Follow.objects.filter(follower=self, following=profile).delete()
+            return True
+        return False
+    #FUNCION para megusta un post
+    def like_post(self, post):
+        post.like(self.user)
+    #FUNCION para no me gusta un post
+    def unlike_post(self, post):
+        post.unlike(self.user)
+
+
 #Creamos el modelo de follow para poder ver desde cuando sigue a alguien y a quien sigue y quien le sigue
 class Follow(models.Model):
     follower = models.ForeignKey(UserProfile, verbose_name='¿Quien sigue?', on_delete=models.CASCADE, related_name='follower_set')
