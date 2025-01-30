@@ -19,9 +19,10 @@ class PostCreateView(CreateView):
     success_url = reverse_lazy('home')
 
     def form_valid(self, form):
-        form.instance.user = self.request.user
-        messages.add_message(self.request, messages.SUCCESS, "Publicación creada correctamente.")
-        return super(PostCreateView, self).form_valid(form)
+        form.instance.user = self.request.user  # Asignar usuario actual
+        response = super().form_valid(form)
+        messages.success(self.request, "Publicación creada correctamente.")
+        return response
 
 
 class PostDetailView(DetailView, CreateView):
