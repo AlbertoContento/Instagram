@@ -50,5 +50,5 @@ Este proyecto está bajo la licencia MIT. Consulta LICENSE para más detalles.
 ## 🎨 Capturas de Pantalla 
 Aquí tienes una vista previa de cómo luce el proyecto:
 ![Pantalla Principal](https://github.com/AlbertoContento/Instagram/blob/main/assets/Captura%20de%20pantalla.png)
-![Pantalla Principal](https://github.com/AlbertoContento/Instagram/blob/main/assets/Captura%20de%20pantalla.png)
+![Pantalla Principal](https://github.com/AlbertoContento/Instagram/blob/main/assets/Captura%20de%20pantalla1.png)
 ![Pantalla Principal](https://github.com/AlbertoContento/Instagram/blob/main/assets/Captura%20de%20pantalla.png)
