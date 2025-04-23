@@ -62,7 +62,7 @@ class RegisterView(CreateView):
     model = User
     template_name = "general/register.html"
     success_url = reverse_lazy('login')#Pagina que mostrar despues de registrar
-    form_class = RegistrationForm#le pasamos el formulario
+    form_class = RegistrationForm #le pasamos el formulario
 
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS, "Usuario creado correctamente.")
