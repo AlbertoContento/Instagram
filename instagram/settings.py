@@ -12,10 +12,9 @@ SECRET_KEY = 'django-insecure-_*@dns^*5(dyys6u$-eod9@#p^jy=y83q-s_(62&1ez2o1mz1^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://instagram.pruebas-alberto.online','instagram.pruebas-alberto.online', 'www.instagram.pruebas-alberto.online']
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -114,12 +113,20 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5" #configuramos el crispy de bootsrap5
+CRISPY_TEMPLATE_PACK = "bootstrap5" #configuramos el crispy de bootsrap5
+
+#Vamos a configurar el login_url para que cuando intentemos acceder a una view sin estar registrados nos lleve a la url de login
+LOGIN_URL= reverse_lazy('login')#Cuando intento entrar en una url que no puede entrar si no estoy logueado me manda al login
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5" #configuramos el crispy de bootsrap5
 CRISPY_TEMPLATE_PACK = "bootstrap5" #configuramos el crispy de bootsrap5
 
