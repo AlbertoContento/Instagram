@@ -1,25 +1,141 @@
+{% load static %}
 <header>
-  <div class="container">
-    <h1>InstaConquer</h1>
-    <nav>
-      <ul>
-        <li><a href="{% url 'home' %}">Inicio</a></li>
-        <li><a href="{% url 'profile_list' %}">Perfiles</a></li>
-        {% if not request.user.is_authenticated %}
-        <li><a href="{% url 'login' %}">Login</a></li>
-        <li><a href="{% url 'register' %}">Registro</a></li>
-        {% endif %}
-        <li><a href="{% url 'contact' %}">Contacto</a></li>
-        {% if request.user.is_authenticated %}
-        <li><a href="{% url 'post_create' %}">Publicar</a></li>
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+  <div class="container d-flex justify-content-between align-items-center">
+    
+    <!-- Logo -->
+    <a class="navbar-brand fw-bold text-dark" href="{% url 'home' %}">
+      InstaConquer
+    </a>
+
+    <!-- Iconos de navegación -->
+    <ul class="navbar-nav flex-row gap-4 align-items-center">
+      <li class="nav-item">
+        <a class="nav-link text-dark" href="{% url 'home' %}">
+          <i class="bi bi-house-door-fill fs-4"></i>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-dark" href="{% url 'profile_list' %}">
+          <i class="bi bi-people-fill"></i>
+        </a>
+      </li>
+      {% if request.user.is_authenticated %}
+      <li class="nav-item">
+        <a class="nav-link text-dark" href="{% url 'post_create' %}">
+          <i class="bi bi-plus-square fs-4"></i>
+        </a>
+      </li>
+      <!-- Icono que abre el modal de busqueda-->
+      <li>
+        <a class="text-dark" href="#" data-bs-toggle="modal" data-bs-target="#modalBusqueda">
+          <i class="bi bi-search fs-4"></i>
+        </a>
+      </li>
+      <!-- Modal de busqueda -->
+      <div class="modal fade" id="modalBusqueda" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content rounded-4 p-3">
+            <h5 class="fw-bold">Búsqueda</h5>
+            <input id="inputBusqueda" type="text" class="form-control mb-3" placeholder="Busca amigos...">
+            <ul id="resultadosBusqueda" class="list-unstyled"></ul>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if not request.user.is_authenticated %}
         <li>
-          <a href="{% url 'profile_detail' request.user.profile.pk %}"
-            >Mi perfil</a
-          >
+          <a class="nav-link text-dark" href="{% url 'login' %}">
+            <i class="bi bi-key-fill"></i>
+          </a>
         </li>
-        <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
-        {% endif %}
-      </ul>
-    </nav>
-  </div>
+        <li>
+          <a class="nav-link text-dark" href="{% url 'register' %}">
+            <i class="bi bi-person-lines-fill"></i>
+          </a>
+        </li>
+      {% endif %}
+      <!-- Imagen de perfil -->
+      {% if request.user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'profile_detail' request.user.profile.pk %}">
+            {% if request.user.profile.profile_picture %}
+              <img src="{{ request.user.profile.profile_picture.url }}" class="profile-pic" alt="Perfil">
+            {% else %}
+              <img src="{% static 'icons/mi_perfil.png' %}" class="profile-pic" alt="Perfil" width="35" height="35">
+            {% endif %}
+          </a>
+        </li>
+      {% endif %}
+      {% if request.user.is_authenticated %}
+        <li>
+          <a class="nav-link text-dark" href="{% url 'logout' %}">
+            <i class="bi bi-box-arrow-right"></i>
+          </a>
+        </li>
+      {% endif %}
+    </ul>
+</nav>
 </header>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const inputBusqueda = document.getElementById('inputBusqueda');
+    const resultadosLista = document.getElementById('resultadosBusqueda');
+
+    inputBusqueda.addEventListener('input', function () {
+        const query = inputBusqueda.value.trim();
+
+        if (query.length > 0) {
+            fetch(`/buscar-amigos/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    resultadosLista.innerHTML = '';
+
+                    if (data.resultados.length > 0) {
+                        data.resultados.forEach(usuario => {
+                            const li = document.createElement('li');
+                            li.classList.add('d-flex', 'align-items-center', 'mb-2');
+
+                            // Crear el contenido del resultado de forma más segura
+                            const enlace = document.createElement('a');
+                            enlace.href = `/profile/${usuario.pk}/`;
+                            enlace.classList.add('d-flex', 'align-items-center', 'text-decoration-none', 'text-dark');
+
+                            const img = document.createElement('img');
+                            img.src = usuario.foto || '/media/default.jpg';
+                            img.alt = usuario.username;
+                            img.width = 30;
+                            img.height = 30;
+                            img.classList.add('rounded-circle', 'me-2');
+
+                            const infoDiv = document.createElement('div');
+                            const strong = document.createElement('strong');
+                            strong.textContent = usuario.username;
+                            const small = document.createElement('small');
+                            small.textContent = usuario.nombre;
+
+                            infoDiv.appendChild(strong);
+                            infoDiv.appendChild(document.createElement('br'));
+                            infoDiv.appendChild(small);
+
+                            enlace.appendChild(img);
+                            enlace.appendChild(infoDiv);
+                            li.appendChild(enlace);
+                            resultadosLista.appendChild(li);
+                        });
+                    } else {
+                        resultadosLista.innerHTML = '<li class="text-muted">No se encontraron resultados.</li>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al buscar usuarios:', error);
+                    resultadosLista.innerHTML = '<li class="text-danger">Error al cargar resultados.</li>';
+                });
+        } else {
+            resultadosLista.innerHTML = '';
+        }
+    });
+});
+</script>

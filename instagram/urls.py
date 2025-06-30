@@ -6,7 +6,9 @@ from .views import HomeView, LoginView, RegisterView, ContactView, LegalView, lo
 #importamos esto para que podamos ver las imagenes staticas
 from django.conf.urls.static import static
 from django.conf import settings
-from posts.views import PostCreateView, PostDetailView, like_post, like_post_ajax
+from posts.views import PostCreateView, PostDetailView, like_post, like_post_ajax, buscar_amigos, eliminar_comentario, crear_comentario, responder_comentario
+from . import views
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -22,5 +24,9 @@ urlpatterns = [
     path('posts/like/<pk>/', like_post, name='post_like'),
     path('posts/like-ajax/<pk>/', like_post_ajax, name='post_like_ajax'),
     path('legal/', LegalView.as_view(), name='legal'),
-    path('logout/', logout_view, name='logout')
+    path('logout/', logout_view, name='logout'),
+    path('buscar-amigos/', buscar_amigos, name='buscar_amigos'),
+    path('comentario/eliminar/<int:pk>/', eliminar_comentario, name='eliminar_comentario'),
+    path('comentario/nuevo/<int:post_id>/', crear_comentario, name='crear_comentario'),
+    path('comentario/<int:pk>/responder/', responder_comentario, name='responder_comentario')
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

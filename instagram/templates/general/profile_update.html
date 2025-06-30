@@ -1,6 +1,8 @@
 {% extends "general/layout.html" %}
 {% load crispy_forms_tags %}
 
+{% load static %}
+
 {% block head_title %}Bienvenido a nuestro InstaConquer{% endblock %}
 
 {% block page_content %}
@@ -8,13 +10,30 @@
     {% include '_includes/_messages.html' %}
 
     <h1>Editar perfil</h1>
+    <div class="divEditarPerfil container mt-4">
+        <div class="perfil-container d-flex align-items-center">
+            <p class="me-5">
+                {% if profile.profile_picture %}
+                    <img width="100" height="100" class="rounded-circle me-2" src="{{ profile.profile_picture.url }}" alt="imagen de perfil">
+                {% else %}
+                    <img width="100" height="100" class="rounded-circle me-2" src="{% static 'icons/mi_perfil.png' %}" alt="imagen predeterminada">        
+                {% endif %}
+            </p>
+            <div>
+                <div class="d-flex  align-items-center">
+                    <p class="nombre-usuario ms-4 mb-2 me-3 me-5">{{ profile.user.username }}</p>
+                    <button class="btn btn-primary ms-5">Cambiar foto</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="row">
         <div class="col-12 col-sm-6">
             {{ form.bio|as_crispy_field }}
             {{ form.birth_date|as_crispy_field }}
-            {{ form.profile_picture|as_crispy_field }}
         </div>
         </div>
         <button class="btn btn-primary">Actualizar</button>

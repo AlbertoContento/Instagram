@@ -1,30 +1,65 @@
 {% extends "general/layout.html" %}
 
 {% load crispy_forms_tags %}
+{% load static %}
 
 {% block head_title %}InstaConquer{% endblock %}
+
 {% block page_title %}
-    <div class="container">
-        <h1>Perfil de {{ request.user.username }}</h1>
-        {% include '_includes/_messages.html' %}
-    </div>
+<div class="container">
+    <h1>Perfil de {{ request.user.username }}</h1>
+    {% include '_includes/_messages.html' %}
+</div>
 {% endblock %}
 
 {% block page_content %}
 <div class="container">
-    <p>Biografia: {{ profile.bio|default_if_none:"Sin rellenar" }}</p>
-    <p>Fecha de nacimiento: {{ profile.birth_date|default_if_none:"Sin rellenar" }}</p>
-    <p>
-        {% if profile.profile_picture %}
-            <img width="100" height="100" src="{{ profile.profile_picture.url }}" alt="">
-        {% else %}
-            <p>No dispone de foto de perfil</p>
-        {% endif %}
-    </p>
-    <p>Seguidores: {{ profile.followers.count }}</p>
-    {% if profile.user == request.user %}
-    <p><a href="{% url 'profile_update' profile.pk %}">Editar</a></p>
-    {% endif %}
+    <div class="perfil-container d-flex is-align-items-center">
+        <p>
+            {% if profile.profile_picture %}
+                <img width="100" height="100" class="rounded-circle me-2" src="{{ profile.profile_picture.url }}" alt="imagen de perfil">
+            {% else %}
+                <img width="100" height="100" class="rounded-circle me-2" src="{% static 'icons/mi_perfil.png' %}" alt="imagen predeterminada">        
+            {% endif %}
+        </p>
+        <div>
+            <div class="d-flex align-items-center mb-2">
+                <p class="nombre-usuario ms-4 mb-2 me-3">{{ profile.user.username }}</p>
+                <div class="d-flex gap-2">
+                    <p class="pEditarPerfil ms-3 mb-2">
+                        <a href="{% url 'profile_update' profile.pk %}">Edita Perfil</a>
+                    </p>            
+                </div>
+
+                <!-- Icono de ajustes -->
+                <i class="bi bi-gear mb-2 ms-3" role="button" data-bs-toggle="modal" data-bs-target="#modalAjustes"></i>
+            </div> <!-- cierre de .d-flex align-items-center -->
+            <div class="d-flex gap-3 ms-4">
+                <p class="mb-0"><strong>{{ profile.user.posts.count }}</strong> publicaciones</p>
+                <p class="mb-0"><strong>{{ profile.followers.count }}</strong> seguidores</p>
+                <p class="mb-0"><strong>{{ profile.following.count }}</strong> siguiendo</p>
+            </div>
+        </div> <!-- cierre del div que contiene nombre + editar perfil + icono ajustes -->
+
+    </div> <!-- cierre de .perfil-container -->
+
+    <!-- Modal de Ajustes -->
+    <div class="modal fade" id="modalAjustes" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 overflow-hidden">
+                <div class="list-group list-group-flush text-center">
+                    <button class="list-group-item list-group-item-action">Aplicaciones y sitios web</button>
+                    <button class="list-group-item list-group-item-action">Código QR</button>
+                    <button class="list-group-item list-group-item-action">Notificaciones</button>
+                    <button class="list-group-item list-group-item-action">Configuración y privacidad</button>
+                    <button class="list-group-item list-group-item-action">Meta Verified</button>
+                    <button class="list-group-item list-group-item-action">Supervisión</button>
+                    <button class="list-group-item list-group-item-action">Cerrar sesión</button>
+                    <button class="list-group-item list-group-item-action text-danger" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {% if profile.user != request.user %}
         <form action="" method="post">
@@ -48,5 +83,5 @@
             {% endfor %}
         </div>
     </section>
-</div>
+</div> <!-- cierre del container principal -->
 {% endblock %}

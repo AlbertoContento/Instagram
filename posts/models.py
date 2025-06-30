@@ -22,6 +22,8 @@ class Comment(models.Model):
     user = models.ForeignKey(User, verbose_name="Usuario", on_delete=models.CASCADE, related_name='comments')
     text = models.TextField("Contenido del comentario", max_length=300)
     created_at = models.DateTimeField(auto_now_add=True)
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
+
 
     class Meta:
         verbose_name = 'Comentario'

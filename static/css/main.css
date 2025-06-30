@@ -1,0 +1,35 @@
+
+/* Redondear imágenes de perfil */
+.profile-pic {
+    width: 35Px;
+    height: 35px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* mi perfil */
+p.pEditarPerfil a{
+    text-decoration: none;
+    color: black;
+    background-color: rgb(239, 239, 239);
+    display: inline-block;
+    padding: 5px 20px;
+    border-radius: 7px;
+}
+
+p.pEditarPerfil a:hover {
+    background-color: rgba(199, 192, 192, 0.649);
+}
+
+.icono-megusta {
+    color: black;
+    cursor: pointer; /* cambia el cursor para que parezca clicable */
+}
+
+.icono-megusta:hover {
+    color: gray;
+}
+
+.border-top {
+    border-top: 1px solid black;
+}

@@ -1,5 +1,3 @@
-from django.db.models.query import QuerySet
-from django.http import HttpRequest
 from django.http.response import HttpResponse as HttpResponse
 from django.views.generic import TemplateView, CreateView, DetailView, ListView
 from .forms import RegistrationForm, LoginForm
@@ -164,3 +162,4 @@ class ProfileUpdateView(UpdateView):
     
     def get_success_url(self):#devuelve la url del perfil editado
         return reverse('profile_detail', args=[self.object.pk])
+
