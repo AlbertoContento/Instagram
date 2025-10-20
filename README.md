@@ -34,7 +34,7 @@ Modo SQL: STRICT_TRANS_TABLES
 Bootstrap 5 → para diseño responsive y moderno
 JavaScript / AJAX → para manejar likes, comentarios y seguir usuarios sin recargar la página
 HTML5 + CSS3 → estructuración y estilo de las vistas
-Iconos (probablemente Font Awesome o Bootstrap Icons)
+Iconos (Font Awesome o Bootstrap Icons)
 
 🔹 Plantillas Django (Jinja-like):
 Uso de extends, include, block para heredar layouts.
