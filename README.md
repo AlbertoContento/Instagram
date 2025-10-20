@@ -30,45 +30,72 @@ Modo SQL: STRICT_TRANS_TABLES
 - Configuración profesional del entorno (entorno virtual, requirements.txt, .env)
 
 🎨 💻 Frontend (Interfaz)
+
 🔹 Frameworks/Librerías:
 Bootstrap 5 → para diseño responsive y moderno
+
 JavaScript / AJAX → para manejar likes, comentarios y seguir usuarios sin recargar la página
+
 HTML5 + CSS3 → estructuración y estilo de las vistas
+
 Iconos (Font Awesome o Bootstrap Icons)
 
 🔹 Plantillas Django (Jinja-like):
+
 Uso de extends, include, block para heredar layouts.
+
 Plantilla base general (layout.html o similar).
+
 Componentes parciales (_posts.html, modales de comentarios, etc.)
 
 🗂️ 📸 Gestión de archivos:
+
 Carpeta media/ → para fotos de perfil, publicaciones, etc.
+
 Carpeta static/ → para CSS, JS y recursos estáticos.
+
 Configurado en settings.py con rutas MEDIA_URL, MEDIA_ROOT, STATIC_URL, STATIC_ROOT.
 
 ☁️ 🚀 Despliegue (Producción)
+
 🔹 Servidor:
+
 DigitalOcean (Droplet con Ubuntu)
+
 CloudPanel (para gestionar dominios y sitios web)
+
 Subdominio: instagram.pruebas-alberto.online
 
 🔹 Servicios configurados:
+
 Gunicorn → servidor WSGI de Django
+
 Nginx → proxy reverso para servir la app y archivos estáticos
+
 Certbot (SSL) → para HTTPS
+
 Git → control de versiones y despliegue automático
 
 🧰 📦 Herramientas adicionales
+
 Entorno virtual (venv) para aislar dependencias.
+
 Archivo requirements.txt con librerías necesarias (Django, Pillow, mysqlclient, etc.).
+
 VS Code como entorno de desarrollo principal.
+
 Git + GitHub para control de versiones.
+
 PowerShell / CMD / Terminal VS Code para ejecución de comandos.
 
 🔒 Seguridad y buenas prácticas
+
 Manejo de variables sensibles mediante .env.
+
 .gitignore configurado para no subir env/, db.sqlite3, __pycache__, etc.
+
 Formularios Django con CSRF tokens para seguridad.
+
 Políticas de ejecución ajustadas para PowerShell.
 
 ## 🚀 Cómo Usar
