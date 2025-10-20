@@ -28,5 +28,5 @@ urlpatterns = [
     path('buscar-amigos/', buscar_amigos, name='buscar_amigos'),
     path('comentario/eliminar/<int:pk>/', eliminar_comentario, name='eliminar_comentario'),
     path('comentario/nuevo/<int:post_id>/', crear_comentario, name='crear_comentario'),
-    path('comentario/<int:pk>/responder/', responder_comentario, name='responder_comentario')
+    path('comentario/<int:comment_id>/responder/', responder_comentario, name='responder_comentario'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

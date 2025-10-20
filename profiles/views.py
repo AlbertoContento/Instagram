@@ -1,3 +1,10 @@
-from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.views.generic import UpdateView
+from profiles.models import UserProfile
+from .forms import ProfileUpdateForm
 
-# Create your views here.
+class ProfileUpdateView(UpdateView):
+    model = UserProfile
+    form_class = ProfileUpdateForm
+    template_name = 'profiles/profile_update.html'
+    success_url = reverse_lazy('profile_detail')

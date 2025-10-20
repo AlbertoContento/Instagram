@@ -8,18 +8,15 @@ from django.views.decorators.http import require_POST
 from django.views.generic.detail import DetailView
 from django.shortcuts import get_object_or_404, redirect
 
-
 from profiles.models import Follow, UserProfile
-from .forms import PostCreateForm, CommentCreateForm # type: ignore
+from .forms import PostCreateForm, CommentCreateForm
 from django.shortcuts import HttpResponseRedirect
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse
 from django.http import JsonResponse
 from django.db.models import Q
 from posts.models import Comment
 
-
-
-@method_decorator(login_required, name='dispatch')#protege las vistas de usuarios que no esten autenticados
+@method_decorator(login_required, name='dispatch')
 class PostCreateView(CreateView):
     template_name = "posts/post_create.html"
     model = Post
@@ -27,7 +24,7 @@ class PostCreateView(CreateView):
     success_url = reverse_lazy('home')
 
     def form_valid(self, form):
-        form.instance.user = self.request.user  # Asignar usuario actual
+        form.instance.user = self.request.user
         response = super().form_valid(form)
         messages.success(self.request, "Publicación creada correctamente.")
         return response
@@ -52,10 +49,9 @@ class PostDetailView(DetailView, CreateView):
         context = super().get_context_data(**kwargs)
         post = self.get_object()
         context['profile'] = post.user.profile
-        context['comments'] = post.comments.all().order_by('created_at')  # <-- añade los comentarios aquí
+        context['comments'] = post.comments.all().order_by('created_at')
         return context
 
-#Vista basada en una funcion con el decorador login required
 @login_required
 def like_post(request, pk):
     post = Post.objects.get(pk=pk)
@@ -69,31 +65,26 @@ def like_post(request, pk):
     return HttpResponseRedirect(reverse('post_detail', args=[pk]))
 
 
-#Misma vista que la anterior pero con AJAX(javascript)
 @login_required
 def like_post_ajax(request, pk):
-    post = Post.objects.get(pk=pk)
-    if request.user in post.likes.all():
-        post.likes.remove(request.user)
-        return JsonResponse(
-            {
-                'message': 'Ya no te gusta esta publicacion',
-                'liked': False,
-                'nLikes': post.likes.all().count()
-            }
-        )
-    else:
-        post.likes.add(request.user)
-        return JsonResponse(
-            {
-                'message': 'Te gusta esta publicacion',
-                'liked': True,
-                'nLikes': post.likes.all().count()
-            }
-        )
-    
+    if request.method == "POST":
+        post = get_object_or_404(Post, pk=pk)
 
-#BUSQUEDA AMIGOS
+        if request.user in post.likes.all():
+            post.likes.remove(request.user)
+            liked = False
+        else:
+            post.likes.add(request.user)
+            liked = True
+
+        return JsonResponse({
+            "success": True,
+            "liked": liked,
+            "nLikes": post.likes.count()
+        })
+
+    return JsonResponse({"success": False, "message": "Método no permitido."}, status=405)
+
 @login_required
 def buscar_amigos(request):
     query = request.GET.get('q', '')
@@ -101,17 +92,12 @@ def buscar_amigos(request):
 
     if query:
         user_profile = request.user.profile
-
-        # Obtenemos todos los perfiles a los que el usuario sigue
         seguidos = Follow.objects.filter(follower=user_profile).values_list('following', flat=True)
-
-        # Filtramos los perfiles seguidos que coincidan con la búsqueda
         perfiles_encontrados = UserProfile.objects.filter(
             id__in=seguidos
         ).filter(
             Q(user__username__icontains=query) | Q(user__first_name__icontains=query)
         )
-
         for perfil in perfiles_encontrados:
             results.append({
                 'pk': perfil.user.pk,
@@ -123,7 +109,6 @@ def buscar_amigos(request):
     return JsonResponse({'resultados': results})
 
 
-#ELIMINAR COMENTARIOS
 @login_required
 def eliminar_comentario(request, pk):
     comentario = get_object_or_404(Comment, pk=pk)
@@ -134,13 +119,11 @@ def eliminar_comentario(request, pk):
                 return JsonResponse({"success": True})
             else:
                 return redirect(request.META.get('HTTP_REFERER', '/'))
-    # Si no autorizado
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"success": False}, status=403)
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
-# CREAR COMENTARIOS (con AJAX)
 @login_required
 def crear_comentario(request, post_id):
     if request.method == 'POST':
@@ -155,7 +138,7 @@ def crear_comentario(request, post_id):
                     profile_picture_url = comment.user.profile.profile_picture.url
 
                 return JsonResponse({
-                    'success': True,  # ✅ Necesario para que el JS funcione
+                    'success': True,
                     'username': comment.user.username,
                     'text': comment.text,
                     'profile_picture': profile_picture_url,
@@ -164,28 +147,26 @@ def crear_comentario(request, post_id):
                 })
 
             return redirect(request.META.get('HTTP_REFERER', '/'))
-        
+    return JsonResponse({'success': False}, status=400)
 
-#RESPONDER COMENTARIO
+
 @login_required
 @require_POST
 def responder_comentario(request, comment_id):
     parent_comment = get_object_or_404(Comment, pk=comment_id)
-    if request.method == 'POST':
-        text = request.POST.get('text')
-        if text:
-            new_comment = Comment.objects.create(
-                user=request.user,
-                post=parent_comment.post,
-                text=text,
-                parent=parent_comment
-            )
-            return JsonResponse({
-                'success': True,
-                'comment_id': new_comment.id,
-                'text': new_comment.text,
-                'username': request.user.username,
-                'profile_picture': request.user.profile.profile_picture.url if request.user.profile.profile_picture else '',
-                'can_delete': True
-            })
+    text = request.POST.get('text')
+    if text:
+        new_comment = Comment.objects.create(
+            user=request.user,
+            post=parent_comment.post,
+            text=text,
+            parent=parent_comment
+        )
+        return JsonResponse({
+            'success': True,
+            'comment_id': new_comment.id,
+            'text': new_comment.text,
+            'username': request.user.username,
+            'profile_picture': request.user.profile.profile_picture.url if request.user.profile.profile_picture else ''
+        })
     return JsonResponse({'success': False}, status=400)

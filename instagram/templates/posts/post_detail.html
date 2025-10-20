@@ -1,14 +1,12 @@
 {% extends "general/layout.html" %}
 
 {% load crispy_forms_tags %}
-
 {% load static %}
 
 {% block head_title %}InstaConquer{% endblock %}
 {% block page_title %}{% endblock %}
 
 {% block page_content %}
-{% comment %} Detalle de publicacion {% endcomment %}
 <div class="container">
     {% include '_includes/_messages.html' %}
 
@@ -19,8 +17,16 @@
             <div>
                 <div class="d-flex flex-row justify-content-between align-items-center p-2 border-bottom">
                     <div class="d-flex flex-row align-items-center feed-text px-2">
-                        <img class="rounded-circle" src="{{ post.user.profile.profile_picture.url }}" width="45" height="45">
-                        <div class="d-flex flex-column flex-wrap ml-2 ms-3">
+                    {% if request.user.profile.profile_picture.name %}
+                        <img class="rounded-circle"
+                            src="{{ request.user.profile.profile_picture.url }}"
+                            width="45" height="45">
+                    {% else %}
+                        <img class="rounded-circle"
+                            src="{% static 'icons/mi_perfil.png' %}"
+                            width="45" height="45">
+                    {% endif %}                        
+                    <div class="d-flex flex-column flex-wrap ml-2 ms-3">
                             <span class="font-weight-bold">{{ post.user }}</span>
                             <span class="text-secondary time">{{ post.created_at }}</span>
                         </div>
@@ -31,213 +37,201 @@
                 </div>
             </div>
             <div class="feed-image p-2 px-3">
-                <img width="300px" class="img-fluid img-responsive d-block mx-auto" src="{{ post.image.url }}">
+                <img class="img-fluid img-responsive d-block mx-auto" src="{{ post.image.url }}">
             </div>
-        </div>     
-    <div class="d-flex justify-content-between">
-        <div>
-            <button type="button" class="icono-megusta btn fs-4" aria-label="Me gusta">
-                <i class="bi bi-heart"></i>
-            </button>
+        </div>
+        <div class="d-flex justify-content-between">
+            <div>
+                <button type="button" class="icono-megusta btn fs-4 likeButton" data-url="{% url 'post_like_ajax' post.pk %}" aria-label="Me gusta">
+                    {% if request.user in post.likes.all %}
+                        <i class="bi bi-heart-fill text-danger"></i>
+                    {% else %}
+                        <i class="bi bi-heart"></i>
+                    {% endif %}
+                </button>
 
-            <button type="button" class="icono-megusta btn fs-4" aria-label="Comentario">
-                <i class="bi bi-chat" role="button" data-bs-toggle="modal" data-bs-target="#modalComentarios"></i>
-            </button>
+                <button type="button" class="icono-megusta btn fs-4" aria-label="Comentario">
+                    <i class="bi bi-chat" role="button" data-bs-toggle="modal" data-bs-target="#modalComentarios"></i>
+                </button>
 
-            <button type="button" class="icono-megusta btn fs-4" aria-label="Compartir">
-                <i class="bi bi-share"  role="button" data-bs-toggle="modal" data-bs-target="#modalCompartir"></i>
-            </button>
+                <button type="button" class="icono-megusta btn fs-4" aria-label="Compartir">
+                    <i class="bi bi-share" role="button" data-bs-toggle="modal" data-bs-target="#modalCompartir"></i>
+                </button>
+            </div>
+            <div>
+                <button type="button" class="icono-megusta btn fs-4" aria-label="Guardar" onclick="">
+                    <i class="bi bi-bookmark"></i>
+                </button>
+            </div>
         </div>
         <div>
-            <button type="button" class="icono-megusta btn fs-4" aria-label="Guardar" onclick="toggleBookmark(this)">
-                <i class="bi bi-bookmark"></i>
-            </button>
+            <span class="fw-bold nLikes">{{ post.likes.all.count }}</span>
+            <span class="fw-bold">Me gusta</span>
         </div>
-    </div>
     </article>
 </div>
 
 <!-- Modal de Compartir -->
 <div class="modal fade" id="modalCompartir" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered p-5">
-            <div class="modal-content rounded-4 overflow-hidden p-2">
-                <div class="d-flex">
-                    <button class="list-group-item list-group-item-action d-flex flex-column align-items-center text-center">
-                        <i class="bi bi-facebook fs-2"></i>
-                        <span>Facebook</span>
-                    </button>        
-                    <button class="list-group-item list-group-item-action d-flex flex-column align-items-center text-center">
-                        <i class="bi bi-messenger fs-2"></i>
-                        <span>Meseenger</span>
-                    </button>     
-                    <button class="list-group-item list-group-item-action d-flex flex-column align-items-center text-center">
-                        <i class="bi bi-whatsapp fs-2"></i>
-                        <span>Whatsapp</span>
-                    </button>     
-                    <button class="list-group-item list-group-item-action d-flex flex-column align-items-center text-center">
-                        <i class="bi bi-link-45deg fs-2"></i>
-                        <span>Copiar Enlace</span>
-                    </button>     
-                    <button class="list-group-item list-group-item-action text-danger" data-bs-dismiss="modal" "list-group-item list-group-item-action d-flex flex-column align-items-center text-center">
-                        <span>Cancelar</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-</div>
-<!-- Modal de Comentarios -->
-<div class="modal fade" id="modalComentarios" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content rounded-4 overflow-hidden">
-        <div class="d-flex flex-row" style="height: 90vh;">
-            <!-- Imagen del post -->
-            <div class="flex-grow-1 d-flex justify-content-center align-items-center bg-dark">
-            <img class="img-fluid h-100 w-auto" src="{{ post.image.url }}" style="object-fit: contain;" alt="Imagen">
-            </div>
-
-            <!-- Columna de comentarios -->
-            <div class="d-flex flex-column" style="width: 350px; background: white;">
-            <!-- Cabecera del perfil -->
-            <div class="d-flex align-items-center border-bottom p-2">
-                {% if profile.profile_picture and profile.profile_picture.url %}
-                <img width="35" height="35" class="rounded-circle" src="{{ profile.profile_picture.url }}" alt="perfil">
-                {% else %}
-                <img width="35" height="35" class="rounded-circle" src="{% static 'icons/mi_perfil.png' %}" alt="predeterminado">
-                {% endif %}
-                <p class="mb-0 fw-semibold ms-2">{{ profile.user.username }}</p>
-            </div>
-
-            <!-- Comentarios (scrollable) -->
-            <div id="comentariosContainer" class="flex-grow-1 overflow-auto px-2">
-                {% for comment in comments %}
-                <div class="d-flex align-items-start mt-2 mb-2" id="comentario-{{ comment.id }}">
-                    <div>
-                    {% if comment.user.profile.profile_picture and comment.user.profile.profile_picture.url %}
-                        <img width="32" height="32" class="rounded-circle" src="{{ comment.user.profile.profile_picture.url }}">
-                    {% else %}
-                        <img width="32" height="32" class="rounded-circle" src="{% static 'icons/mi_perfil.png' %}">
-                    {% endif %}
-                    </div>
-                    <div class="ms-1">
-                    <div class="ms-1">
-                        <p class="mb-1">
-                            <span class="fw-semibold">{{ comment.user.username }}</span>
-                            <span class="ms-1">{{ comment.text }}</span>
-                        </p>
-                    </div>
-
-                    <p class="mb-0 text-muted" style="font-size: 0.9em;">hace {{ comment.created_at|timesince }}</p>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-sm btn-link text-primary btn-responder" data-comment-id="{{ comment.id }}">
-                                Responder
-                            </button>   
-                            <!-- Contenedor para el formulario de respuesta -->
-                            <div class="respuesta-form-container mt-2"></div>
-                            <form method="post" action="{% url 'eliminar_comentario' comment.id %}" class="delete-comment-form" data-comment-id="{{ comment.id }}" style="display:inline;">
-                            {% csrf_token %}
-                            {% if comment.user == request.user %}
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
-                            {% endif %}
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                {% empty %}
-                <p class="text-muted mt-3">No hay comentarios aún.</p>
-                {% endfor %}
-            </div>
-
-            <!-- Formulario para nuevo comentario -->
-            <div class="border-top p-2">
-                <form id="comentario-form" method="post" action="{% url 'crear_comentario' post.id %}" class="d-flex align-items-center">
-                {% csrf_token %}
-                {% if request.user.profile.profile_picture and request.user.profile.profile_picture.url %}
-                    <img width="32" height="32" class="rounded-circle" src="{{ request.user.profile.profile_picture.url }}">
-                {% else %}
-                    <img width="32" height="32" class="rounded-circle" src="{% static 'icons/mi_perfil.png' %}">
-                {% endif %}
-                <input type="text" name="text" class="form-control ms-2 me-2 border-0" placeholder="Añade un comentario..." required>
-                <button type="submit" class="btn p-0 text-primary">
-                    <i class="bi bi-send"></i>
+    <div class="modal-dialog modal-dialog-centered p-5">
+        <div class="modal-content rounded-4 overflow-hidden p-2">
+            <div class="d-flex">
+                <button class="list-group-item list-group-item-action d-flex flex-column align-items-center text-center">
+                    <i class="bi bi-facebook fs-2"></i>
+                    <span>Facebook</span>
                 </button>
-                </form>
+                <button class="list-group-item list-group-item-action d-flex flex-column align-items-center text-center">
+                    <i class="bi bi-messenger fs-2"></i>
+                    <span>Messenger</span>
+                </button>
+                <button class="list-group-item list-group-item-action d-flex flex-column align-items-center text-center">
+                    <i class="bi bi-whatsapp fs-2"></i>
+                    <span>Whatsapp</span>
+                </button>
+                <button class="list-group-item list-group-item-action d-flex flex-column align-items-center text-center">
+                    <i class="bi bi-link-45deg fs-2"></i>
+                    <span>Copiar Enlace</span>
+                </button>
+                <button class="list-group-item list-group-item-action text-danger" data-bs-dismiss="modal">
+                    <span>Cancelar</span>
+                </button>
             </div>
-            </div>
-        </div>
         </div>
     </div>
 </div>
 
-    <!-- Botón para ver me gustas -->
-<div class="text-center">
-    {% if request.user.is_authenticated %}
-        <p>
-            <span class="nLikes">{{ post.likes.all.count }}</span>
-                <a class="likeButton" href="{% url 'post_like_ajax' post.pk %}">
-                    {% if request.user in post.likes.all %}
-                        <i class="bi bi-heart-fill"></i>
-                    {% else %}
-                        <i class="bi bi-heart"></i>
-                    {% endif %}
-                </a>
-        </p>
-    {% endif %}
+<!-- Modal de Comentarios -->
+<div class="modal fade" id="modalComentarios" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content rounded-4 overflow-hidden">
+            <div class="d-flex flex-row" style="height: 90vh;">
+                <div class="flex-grow-1 d-flex justify-content-center align-items-center bg-dark">
+                    <img class="img-fluid h-100 w-auto" src="{{ post.image.url }}" style="object-fit: contain;" alt="Imagen">
+                </div>
+
+                <div class="d-flex flex-column" style="width: 350px; background: white;">
+                    <div class="d-flex align-items-center border-bottom p-2">
+                        {% if profile.profile_picture and profile.profile_picture.url %}
+                            <img width="35" height="35" class="rounded-circle" src="{{ profile.profile_picture.url }}" alt="perfil">
+                        {% else %}
+                            <img width="35" height="35" class="rounded-circle" src="{% static 'icons/mi_perfil.png' %}" alt="predeterminado">
+                        {% endif %}
+                        <p class="mb-0 fw-semibold ms-2">{{ profile.user.username }}</p>
+                    </div>
+
+                    <div id="comentariosContainer" class="flex-grow-1 overflow-auto px-2">
+                        {% for comment in comments %}
+                        <div class="d-flex align-items-start mt-2 mb-2" id="comentario-{{ comment.id }}">
+                            <div>
+                                {% if comment.user.profile.profile_picture and comment.user.profile.profile_picture.url %}
+                                    <img width="32" height="32" class="rounded-circle" src="{{ comment.user.profile.profile_picture.url }}">
+                                {% else %}
+                                    <img width="32" height="32" class="rounded-circle" src="{% static 'icons/mi_perfil.png' %}">
+                                {% endif %}
+                            </div>
+                            <div class="ms-2">
+                                <p class="mb-1">
+                                    <span class="fw-semibold">{{ comment.user.username }}</span>
+                                    <span class="ms-1">{{ comment.text }}</span>
+                                </p>
+                                <p class="mb-0 text-muted" style="font-size: 0.9em;">hace {{ comment.created_at|timesince }}</p>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-sm btn-link text-primary btn-responder" data-comment-id="{{ comment.id }}">
+                                        Responder
+                                    </button>
+                                    <div class="respuesta-form-container mt-2"></div>
+                                    {% if comment.user == request.user %}
+                                    <form method="post" action="{% url 'eliminar_comentario' comment.id %}" class="delete-comment-form" data-comment-id="{{ comment.id }}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted mt-3">No hay comentarios aún.</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="border-top p-2">
+                        <form id="comentario-form" method="post" action="{% url 'crear_comentario' post.id %}" class="d-flex align-items-center">
+                            {% csrf_token %}
+                            {% if request.user.profile.profile_picture and request.user.profile.profile_picture.url %}
+                                <img width="32" height="32" class="rounded-circle" src="{{ request.user.profile.profile_picture.url }}">
+                            {% else %}
+                                <img width="32" height="32" class="rounded-circle" src="{% static 'icons/mi_perfil.png' %}">
+                            {% endif %}
+                            <input type="text" name="text" class="form-control ms-2 me-2 border-0" placeholder="Añade un comentario..." required>
+                            <button type="submit" class="btn p-0 text-primary">
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div>
-    <!-- Botón para ver el post completo -->
-    <p class="text-center mt-2 mb-2">
-        <a class="btn btn-primary btn-sm" role="button" href="{% url 'home' %}">Volver</a>
-    </p>
-</div>
+<p class="text-center mt-2 mb-2">
+    <a class="btn btn-primary btn-sm" href="{% url 'home' %}">Volver</a>
+</p>
 
-{% comment %} JAVASCRIPT {% endcomment %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-
-    // Función para adjuntar listener de eliminación
-    function attachDeleteListener(form) {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            const commentId = this.dataset.commentId;
-            const actionUrl = this.action;
-            const csrfTokenInput = this.querySelector('[name=csrfmiddlewaretoken]');
-            const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
-            fetch(actionUrl, {
+    // Like AJAX
+    document.querySelectorAll('.likeButton').forEach(button => {
+        button.addEventListener('click', function() {
+            const url = this.dataset.url;
+            const icon = this.querySelector('i');
+            fetch(url, {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': csrfToken,
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
                     'X-Requested-With': 'XMLHttpRequest',
                 },
             })
-            .then(res => res.json())
+            .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    const elem = document.getElementById(`comentario-${commentId}`);
-                    if (elem) elem.remove();
+                    // Actualiza el icono
+                    const icon = this.querySelector('i');
+                    if (data.liked) {
+                        icon.classList.remove('bi-heart');
+                        icon.classList.add('bi-heart-fill', 'text-danger');
+                    } else {
+                        icon.classList.remove('bi-heart-fill', 'text-danger');
+                        icon.classList.add('bi-heart');
+                    }
+                // 2) Actualiza el contador
+                    document.querySelectorAll('.nLikes').forEach(span => {
+                        // Solo modificamos el primero que contenga número
+                        if (!isNaN(parseInt(span.textContent))) {
+                            span.textContent = data.nLikes;
+                            return;
+                        }
+                    });
                 } else {
-                    alert(data.message || 'No se pudo eliminar el comentario.');
+                    alert('Error al dar me gusta.');
                 }
             })
             .catch(error => {
-                console.error('Error al eliminar comentario vía AJAX:', error);
-                alert('Error en la petición de eliminar.');
+                console.error('Error al dar me gusta:', error);
+                alert('Error en la petición de me gusta.');
             });
         });
-    }
-
-    // Adjuntar listeners a formularios de eliminar ya existentes
-    document.querySelectorAll('.delete-comment-form').forEach(form => {
-        attachDeleteListener(form);
     });
 
-    // Manejar creación de comentario principal vía AJAX
-    const formCrear = document.getElementById("comentario-form");
-    if (formCrear) {
-        formCrear.addEventListener("submit", function (event) {
+    // Comentarios AJAX (crear, responder, eliminar)
+    const comentarioForm = document.getElementById("comentario-form");
+    const comentariosContainer = document.getElementById("comentariosContainer");
+
+    if (comentarioForm) {
+        comentarioForm.addEventListener("submit", function(event) {
             event.preventDefault();
-            const formData = new FormData(formCrear);
-            fetch(formCrear.action, {
+            const formData = new FormData(this);
+            fetch(this.action, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": formData.get("csrfmiddlewaretoken"),
@@ -248,120 +242,123 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    // Construir HTML del nuevo comentario
                     const comentarioHTML = `
-<div class="comentario-item d-flex align-items-start ms-3 mt-2 mb-2" id="comentario-${data.comment_id}">
-    <div class="comentario-foto">
-        <img width="32" height="32" class="rounded-circle"
-            src="${data.profile_picture ? data.profile_picture : '/static/icons/mi_perfil.png'}"
-            alt="imagen de perfil">
+<div class="d-flex align-items-start mt-2 mb-2" id="comentario-${data.comment_id}">
+    <div>
+        <img width="32" height="32" class="rounded-circle" src="${data.profile_picture || '/static/icons/mi_perfil.png'}">
     </div>
-    <div class="comentario-username ms-2">
-        <p class="mb-0 fw-semibold">${data.username}</p>
-        <p class="mb-1">${data.text}</p>
-        <div class="d-flex gap-2 mt-1">
-            <button type="button" class="btn btn-sm btn-link text-primary btn-responder" data-comment-id="${data.comment_id}">
-                Responder
-            </button>
+    <div class="ms-2">
+        <p class="mb-1">
+            <span class="fw-semibold">${data.username}</span>
+            <span class="ms-1">${data.text}</span>
+        </p>
+        <p class="mb-0 text-muted" style="font-size:0.9em;">hace un momento</p>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-link text-primary btn-responder" data-comment-id="${data.comment_id}">Responder</button>
             ${data.can_delete ? `
-            <form method="post"
-                    action="/comentario/eliminar/${data.comment_id}/"
-                    class="delete-comment-form"
-                    data-comment-id="${data.comment_id}"
-                    style="display:inline;">
-                <input type="hidden" name="csrfmiddlewaretoken" value="${formCrear.querySelector('[name=csrfmiddlewaretoken]').value}">
+            <form method="post" action="/comentario/eliminar/${data.comment_id}/" class="delete-comment-form" data-comment-id="${data.comment_id}" style="display:inline;">
+                <input type="hidden" name="csrfmiddlewaretoken" value="${formData.get("csrfmiddlewaretoken")}">
                 <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
             </form>` : ''}
+            <div class="respuesta-form-container mt-2"></div>
         </div>
-        <div class="respuesta-form-container mt-2"></div>
     </div>
 </div>`;
-                    // Insertar antes del formulario
-                    formCrear.insertAdjacentHTML("beforebegin", comentarioHTML);
-                    // Adjuntar listener de eliminación al nuevo comentario
-                    const nuevoForm = document.querySelector(`.delete-comment-form[data-comment-id="${data.comment_id}"]`);
-                    if (nuevoForm) attachDeleteListener(nuevoForm);
-                    // Adjuntar listener de responder al nuevo comentario
-                    const nuevoBtn = document.querySelector(`.btn-responder[data-comment-id="${data.comment_id}"]`);
-                    if (nuevoBtn) attachReplyListener(nuevoBtn);
-                    formCrear.reset();
+                    comentariosContainer.insertAdjacentHTML("beforeend", comentarioHTML);
+                    comentarioForm.reset();
                 } else {
                     alert("Error al crear el comentario.");
                 }
             })
             .catch(error => {
-                console.error("Error al crear comentario vía AJAX:", error);
+                console.error("Error al crear comentario:", error);
                 alert("Error al crear el comentario.");
             });
         });
     }
 
-    // Función para adjuntar listener de respuesta
-    function attachReplyListener(button) {
-        button.addEventListener('click', function () {
-            const commentId = this.dataset.commentId;
-            const container = this.closest('.comentario-username').querySelector('.respuesta-form-container');
-            // Si ya existe un formulario, no duplicar
-            if (container.querySelector('form')) return;
-            // Crear formulario
-            const formHtml = `
-<form class="form-respuesta mt-2 d-flex">
+    comentariosContainer.addEventListener("click", function(e) {
+        const responderBtn = e.target.closest('.btn-responder');
+        if (!responderBtn) return;
+
+        const commentId = responderBtn.dataset.commentId;
+        const container = responderBtn.parentElement.querySelector('.respuesta-form-container');
+        if (container.querySelector('form')) return;
+
+        const formHtml = `
+<form class="form-respuesta d-flex mt-2">
     <input type="text" name="text" class="form-control me-2" placeholder="Escribe tu respuesta..." required>
     <button type="submit" class="btn btn-primary btn-sm px-3"><i class="bi bi-send"></i></button>
 </form>`;
-            container.innerHTML = formHtml;
+        container.innerHTML = formHtml;
+        const form = container.querySelector('form');
 
-            const form = container.querySelector('form');
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const text = this.querySelector('input[name="text"]').value;
-                fetch('/comentario/responder/' + commentId + '/', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': formCrear.querySelector('[name=csrfmiddlewaretoken]').value,
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({text})
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        // Construir respuesta
-                        const respuestaHTML = `
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const text = form.querySelector('input[name="text"]').value.trim();
+            if (!text) return;
+
+            fetch('/comentario/' + commentId + '/responder/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({ text }),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const respuestaHTML = `
 <div class="d-flex align-items-start mt-2 ms-4">
-    <div>
-        <img width="28" height="28" class="rounded-circle"
-                src="${data.profile_picture || '/static/icons/mi_perfil.png'}"
-                alt="imagen perfil">
-    </div>
+    <div><img width="28" height="28" class="rounded-circle" src="${data.profile_picture || '/static/icons/mi_perfil.png'}"></div>
     <div class="ms-2">
         <p class="mb-0 fw-semibold">${data.username}</p>
         <p class="mb-1">${data.text}</p>
     </div>
 </div>`;
-                        container.insertAdjacentHTML('beforebegin', respuestaHTML);
-                        form.remove();
-                    } else {
-                        alert("Error al enviar respuesta.");
-                    }
-                })
-                .catch(err => {
-                    console.error("Error:", err);
+                    form.insertAdjacentHTML('beforebegin', respuestaHTML);
+                    form.remove();
+                } else {
                     alert("Error al enviar respuesta.");
-                });
+                }
+            })
+            .catch(error => {
+                console.error("Error al responder comentario:", error);
+                alert("Error al enviar respuesta.");
             });
         });
-    }
-
-    // Adjuntar listeners a botones de responder ya existentes
-    document.querySelectorAll('.btn-responder').forEach(btn => {
-        attachReplyListener(btn);
     });
 
+    comentariosContainer.querySelectorAll(".delete-comment-form").forEach(form => {
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+            const commentId = this.dataset.commentId;
+            const actionUrl = this.action;
+            const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch(actionUrl, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById(`comentario-${commentId}`).remove();
+                } else {
+                    alert(data.message || "No se pudo eliminar el comentario.");
+                }
+            })
+            .catch(error => {
+                console.error("Error al eliminar comentario:", error);
+                alert("Error al eliminar el comentario.");
+            });
+        });
+    });
 });
 </script>
-
-
-
 {% endblock %}

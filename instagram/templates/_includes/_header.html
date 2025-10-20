@@ -55,18 +55,24 @@
           </a>
         </li>
       {% endif %}
-      <!-- Imagen de perfil -->
-      {% if request.user.is_authenticated %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'profile_detail' request.user.profile.pk %}">
-            {% if request.user.profile.profile_picture %}
-              <img src="{{ request.user.profile.profile_picture.url }}" class="profile-pic" alt="Perfil">
-            {% else %}
-              <img src="{% static 'icons/mi_perfil.png' %}" class="profile-pic" alt="Perfil" width="35" height="35">
-            {% endif %}
-          </a>
-        </li>
+<!-- Imagen de perfil -->
+{% if request.user.is_authenticated %}
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'profile_detail' request.user.profile.pk %}">
+      {% if request.user.profile.profile_picture.name %}
+        <img src="{{ request.user.profile.profile_picture.url }}"
+              class="profile-pic"
+              alt="Perfil"
+              width="35" height="35">
+      {% else %}
+        <img src="{% static 'icons/mi_perfil.png' %}"
+              class="profile-pic"
+              alt="Perfil"
+              width="35" height="35">
       {% endif %}
+    </a>
+  </li>
+{% endif %}
       {% if request.user.is_authenticated %}
         <li>
           <a class="nav-link text-dark" href="{% url 'logout' %}">
